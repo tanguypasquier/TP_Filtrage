@@ -10,6 +10,7 @@ ts = t[1] # Pas de temps du tableau
 # Differentes constantes 
 c=3e8
 Ae=3e5
+#Ae=2e5
 Pe=np.square(Ae)
 Ge=1
 Gr=1
@@ -17,6 +18,8 @@ sigma=1
 f=2e7
 w=2e-7
 lambd=c/f
+
+print("Distance reelle = ", d, "m")
 
 # Debug
 #print("t = ",t)
@@ -58,19 +61,29 @@ def model_signal():
 noise = np.random.normal(0,1,1000)
 sig = get_received_pulse()
 data = noise + sig
-#plt.plot(data)
-#plt.show()
+plt.plot(data)
+plt.show()
 
 ref_signal=model_signal()
 
 
 def correlation():
-	Ng=ref_signal.size
-	tab_scal = []
-	tab_scal=[np.dot(ref_signal,data[i:i+Ng]) for i in range(1000-Ng)]
-	index_sig = np.argmax(tab_scal)
-	plt.plot(tab_scal)
+	Ng = ref_signal.size
+	#tab_scal = []
+	tau = [np.dot(ref_signal,data[i:i+Ng]) for i in range(1000-Ng)] # Tableau filtre
+	index_sig = np.argmax(tau) # Indice du debut du signal
+	noise_std = np.std(tau[:442]) # Je ne peux que avoir du bruit avant l'index 442 du tableau de temps (temps pour parcourir 200m aller-retour)
+	#print("noise_std = ", noise_std)
+	tab_SNR = tau / noise_std
+	distance_signal = get_distance_from_time(t[index_sig])
+	if(tab_SNR[index_sig] > 3):
+		print("Signal found for distance = ", distance_signal, "m")
+	else:
+		print("No signal found")
+	plt.plot(tab_SNR)
 	plt.show()
+
+	
 
 correlation()
 	
