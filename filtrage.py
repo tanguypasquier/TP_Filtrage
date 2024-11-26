@@ -1,12 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-d = np.random.uniform(200,400)
+d = np.random.uniform(200,400) # Distance aleatoire
 
-t = np.linspace(0,3e-6, 1000)
+t = np.linspace(0,3e-6, 1000) # Tableau echantillons temporels
 
-ts = t[1]
+ts = t[1] # Pas de temps du tableau
 
+# Differentes constantes 
 c=3e8
 Ae=3e5
 Pe=np.square(Ae)
@@ -17,9 +18,9 @@ f=2e7
 w=2e-7
 lambd=c/f
 
-print("t = ",t)
-
-print("size = ", t.size)
+# Debug
+#print("t = ",t)
+#print("size = ", t.size)
 
 def get_delta_t(dist):
 	return (2*dist)/c
@@ -41,7 +42,7 @@ def get_received_pulse():
 	tr=get_delta_t(d)
 	temp=get_template(received_amp)
 	#tab_bool=(t>=tr)&(t<=tr+w) #tableau de bool de la taille de t vec True quand la condition est satisfaite
-	print(t,tr+w)
+	#print(t,tr+w)
 	#received[tab_bool]=get_template(received_amp) #on injecte le template quand 
 	index_min=np.argmin(np.abs(t-tr))
 	received[index_min:index_min+temp.size]=temp
@@ -55,7 +56,7 @@ def model_signal():
 	
 	
 noise = np.random.normal(0,1,1000)
-sig=get_received_pulse()
+sig = get_received_pulse()
 data = noise + sig
 #plt.plot(data)
 #plt.show()
@@ -66,8 +67,6 @@ ref_signal=model_signal()
 def correlation():
 	Ng=ref_signal.size
 	tab_scal = []
-	#for i in range (1000-Ng):
-		#tab_scal.append(np.dot(ref_signal,data[i:i+Ng]))
 	tab_scal=[np.dot(ref_signal,data[i:i+Ng]) for i in range(1000-Ng)]
 	index_sig = np.argmax(tab_scal)
 	plt.plot(tab_scal)
@@ -81,6 +80,5 @@ correlation()
 	
 
 
-get_received_pulse()
+#get_received_pulse()
 	
-
