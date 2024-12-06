@@ -1,11 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-d = np.random.uniform(200,400) # Distance aleatoire
+d = np.random.uniform(200,400) # Distance aleatoire    Q1
 
-t = np.linspace(0,3e-6, 1000) # Tableau echantillons temporels
+t = np.linspace(0,3e-6, 1000) # Tableau echantillons temporels   Q2
 
-ts = t[1] # Pas de temps du tableau
+ts = t[1] # Pas de temps du tableau				Q2
 
 # Differentes constantes 
 c=3e8
@@ -25,18 +25,18 @@ print("Distance reelle = ", d, "m")
 #print("t = ",t)
 #print("size = ", t.size)
 
-def get_delta_t(dist):
-	return (2*dist)/c
+def get_delta_t(dist):					#Q3
+	return (2*dist)/c   #tps de faire aller retour t = 2d/v    2 aller retour 
 
-def get_distance_from_time(time):
+def get_distance_from_time(time):			#Q4
 	return c*(time/2)
 	
-def get_amplitude(dist):
+def get_amplitude(dist):				#Q5  Amplitude du signal reçu
 	return np.sqrt((Pe*Ge*Gr*np.square(lambd)*sigma)/(np.power(4*np.pi,3)*np.power(dist,4)))
 	
-def get_template(A):
+def get_template(A):		#Q6
 	time_template = np.arange(0,w,ts)
-	template = A*np.sin(2*np.pi*f*time_template)
+	template = A*np.sin(2*np.pi*f*time_template)   # w = 2pi *freq
 	return template
 
 def get_received_pulse():
@@ -58,9 +58,10 @@ def model_signal():
 	return get_template(1)
 	
 	
-noise = np.random.normal(0,1,1000)
+noise = np.random.normal(0,1,1000) 
 sig = get_received_pulse()
 data = noise + sig
+plt.figure(figsize = (10,10))
 plt.plot(data)
 plt.show()
 
@@ -80,6 +81,8 @@ def correlation():
 		print("Signal found for distance = ", distance_signal, "m")
 	else:
 		print("No signal found")
+  
+	plt.figure(figsize = (10,10))
 	plt.plot(tab_SNR)
 	plt.show()
 
