@@ -236,10 +236,149 @@ teta_list = Metropolis_Hastings(teta_0, dteta_0, n_iter)
 
 #*****************EN COURS*******************#
 
-print(teta_list[1])
+A = 0.03
+mu = 1500
+sigma = 250
+rho_z = 0.02
+rp = 300
+
+teta_0 = [rp, rho_z, A, mu, sigma]
+n_iter = 10000
+
+n_Markov = 10
+
+full_teta_list = np.zeros((n_Markov, n_iter+1, len(teta_0)))
 
 plt.figure(figsize=(10, 10))
-plt.plot(np.array(teta_list[:][1]))
+for i in range(n_Markov):
+    
+    teta_list = Metropolis_Hastings(teta_0, n_iter)
+    teta_list_np = np.array(teta_list)
+    full_teta_list[i] = teta_list_np
+    plt.scatter(teta_list_np[:,0], teta_list_np[:,1], alpha = 0.2)
+    
+plt.xlabel(r'$r_p$', fontsize = 20)
+plt.ylabel(r'$\rho _0$', fontsize = 20)
 plt.show()
+
+
+teta_list_np = np.array(teta_list)
+
+x = np.arange(0, len(teta_list_np)/10, 0.1)
+plt.figure(figsize=(10, 10))
+plt.plot(x, teta_list_np[:,1])
+plt.xlabel(r'Step', fontsize = 20)
+plt.ylabel(r'$\rho _0$', fontsize = 20)
+plt.show()
+
+
+NCURVES = len(teta_list_np)
+cmap = plt.cm.get_cmap('inferno')
+colors = [cmap(i / NCURVES) for i in range(NCURVES)]
+
+plt.figure(figsize=(10, 10))
+plt.scatter(full_teta_list[0,:,0], full_teta_list[0,:,1], color = colors)
+plt.xlabel(r'$r_p$', fontsize = 20)
+plt.ylabel(r'$\rho _0$', fontsize = 20)
+plt.show()
+
+def log_probability(params): # log de la loi de probabilité (P(teta| d) = L(d|teta) * pi(teta))
+    lp = log_prior(params)
+    if not np.isfinite(lp):
+        return -np.inf
+    return log_likelihood(params) + log_prior(params)
+    
+    
+    import emcee
+ndim = len(teta_0)
+nwalkers = 10
+nstep = 1000
+p0 = np.zeros((nwalkers, ndim))
+
+A = 0.03
+mu = 1500
+sigma = 250
+rho_z = 0.02
+rp = 300
+teta_0 = [rp, rho_z, A, mu, sigma]
+
+dteta_0 = np.array(teta_0) * 0.1
+# dteta_0 = [10, 0.0001, 0.001, 10, 1]
+
+for i in range(nwalkers):
+    p0[i] = params_def(teta_0, dteta_0)
+
+print(p0)
+    
+# p0 = np.random.rand(nwalkers, ndim)
+
+# print(p0)
+# print(p0.shape)
+
+
+sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability)
+
+sampler.run_mcmc(p0, nstep)
+
+chains = sampler.get_chain()
+plt.plot(chains[:, :, 0])
+
+
+def Gelman_rubin(Tab_chaine):
+    """
+    Tab_chaine : array de forme (N, M), où N est la longueur des chaînes et M est le nombre de chaînes.
+    """
+    N = Tab_chaine.shape[1] 
+    M = Tab_chaine.shape[0] 
+    mean_chaine = np.mean(Tab_chaine, axis=1)
+    meanTab = np.mean(Tab_chaine)
+
+    B = np.sum((mean_chaine - meanTab)**2) / (M - 1)
+    W = np.mean(np.var(Tab_chaine, axis=0, ddof=1))
+
+    # Estimation de la variance postulée
+    Var_post = (1 - 1/N) * W + (1+1/M) * B
+
+    # Calcul du facteur Gelman-Rubin
+    R = Var_post / W
+    
+    return R
+
+    
+for i in range(len(teta_0)):
+print("GR of {} = {}".format(names[i], Gelman_rubin(full_teta_list[:, 20:, i])))
+    
+    
+    A = 0.03
+mu = 1500
+sigma = 250
+rho_z = 0.02
+rp = 300
+
+teta_0 = [rp, rho_z, A, mu, sigma]
+n_iter = 5000
+
+n_Markov = 10
+
+# full_teta_list = np.zeros((n_Markov, n_iter+1, len(teta_0)))
+
+R=100
+
+while(R > 1.03):
+    n_iter *= 2
+    full_teta_list = np.zeros((n_Markov, n_iter+1, len(teta_0)))
+    
+    for i in range(n_Markov):
+    
+    
+        teta_list = Metropolis_Hastings(teta_0, n_iter)
+        teta_list_np = np.array(teta_list)
+        full_teta_list[i] = teta_list_np
+        
+    R = Gelman_rubin(full_teta_list[:, int(n_iter * 0.1):, 0])
+    print("Gelman_rubin of {} = {}".format(names[0], Gelman_rubin(full_teta_list[:, int(n_iter * 0.1):, 0])))
+        
+print(n_iter)
+        
 
 
